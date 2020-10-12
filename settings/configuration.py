@@ -10,5 +10,5 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JSON_SORT_KEYS = False
     PROJECT_HOME = os.path.dirname(os.path.realpath(__file__)).replace('/settings', '')
-    UPLOAD_FOLDER_ANNOUN = '{}/images/uploads_annoum/'.format(PROJECT_HOME)
+    UPLOAD_FOLDER_ANNOUN = '{}/images/announcement/'.format(PROJECT_HOME)
     ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'png"', 'jpg"', 'jpeg"'])
