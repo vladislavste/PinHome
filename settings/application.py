@@ -4,6 +4,8 @@ from authorization.views import authorization
 from settings.configuration import Config
 from ext import register_extensions
 from announcement.routes import home_api
+from personal_area.views import personal_area
+
 
 def create_application():
     app = Flask(__name__)
@@ -13,5 +15,6 @@ def create_application():
 
     app.register_blueprint(authorization, url_prefix='/authorization')
     app.register_blueprint(home_api, url_prefix='/api')
+    app.register_blueprint(personal_area, url_prefix='/personal_area')
 
     return app

@@ -6,9 +6,9 @@ from flask import current_app
 from flask import request
 from werkzeug.utils import secure_filename
 from helpers import allowed_file
-from .schema import AnnouncementSchema, AnnouncementImageSchema, CategorySchema
+from .schema import AnnouncementSchema, AnnouncementImageSchema
 from ext import db
-from .models import Announcement, ImagesAnnoun, Category
+from .models import Announcement, ImagesAnnoun
 from authorization.authorization import token_check
 from authorization.models import User
 home_api = Blueprint('api', __name__)
@@ -178,11 +178,3 @@ def search_announcements():
         announcement_schema = AnnouncementSchema()
         all = announcement_schema.dump(all_announs, many=True)
         return {"announcement": all}, 200
-
-
-@home_api.route('/all_categories', methods=['GET'])
-def all_categories():
-    query = Category.query.all()
-    category_schema = CategorySchema()
-    all = category_schema.dump(query, many=True)
-    return {"category": all}, 200
