@@ -1,8 +1,8 @@
-"""kek
+"""empty message
 
-Revision ID: 6ced271d07c0
+Revision ID: e35f9b00ff07
 Revises: 
-Create Date: 2020-10-12 20:52:46.664788
+Create Date: 2020-10-15 22:36:34.159070
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6ced271d07c0'
+revision = 'e35f9b00ff07'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,7 +24,7 @@ def upgrade():
     sa.Column('parent', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('user',
+    op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=200), nullable=False),
     sa.Column('password', sa.String(length=200), nullable=False),
@@ -42,8 +42,23 @@ def upgrade():
     sa.Column('deleted', sa.Boolean(), nullable=True),
     sa.Column('user', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['category'], ['category.id'], ),
-    sa.ForeignKeyConstraint(['user'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['user'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('personal_area',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('surname', sa.String(length=100), nullable=False),
+    sa.Column('name', sa.String(length=100), nullable=False),
+    sa.Column('patronymic', sa.String(length=100), nullable=True),
+    sa.Column('phone_number', sa.String(length=20), nullable=True),
+    sa.Column('email', sa.String(length=100), nullable=True),
+    sa.Column('geolocation', sa.String(length=200), nullable=True),
+    sa.Column('id_user', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['id_user'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email'),
+    sa.UniqueConstraint('id_user'),
+    sa.UniqueConstraint('phone_number')
     )
     op.create_table('deal',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -70,7 +85,7 @@ def upgrade():
     sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('user', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['announcement'], ['announcement.id'], ),
-    sa.ForeignKeyConstraint(['user'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['user'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
@@ -81,7 +96,8 @@ def downgrade():
     op.drop_table('want')
     op.drop_table('images_announ')
     op.drop_table('deal')
+    op.drop_table('personal_area')
     op.drop_table('announcement')
-    op.drop_table('user')
+    op.drop_table('users')
     op.drop_table('category')
     # ### end Alembic commands ###
