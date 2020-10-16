@@ -186,3 +186,12 @@ def all_categories():
     category_schema = CategorySchema()
     all = category_schema.dump(query, many=True)
     return {"category": all}, 200
+
+
+@home_api.route('/get_announcement/<id>', methods=['GET'])
+def get_announcement(id):
+    announ = Announcement.query.get(id)
+    announcement_schema = AnnouncementSchema()
+    all = announcement_schema.dump(announ)
+    return all, 200
+
