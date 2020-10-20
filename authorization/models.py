@@ -9,6 +9,8 @@ class User(db.Model):
     username = db.Column(db.String(200), nullable=False, unique=False)
     password = db.Column(db.String(200), nullable=False)
     date_registration = db.Column(db.DateTime, default=datetime.utcnow(), nullable=True)
+    have_personal_area = db.Column(db.Boolean, default=0, nullable=False)
+    is_active = db.Column(db.Boolean, default=1, nullable=False)
     token = db.Column(db.String(500), nullable=False)
 
     def __init__(self, username=None, password=None, token=None):
