@@ -1,16 +1,17 @@
 import json
 import os
 from uuid import uuid4
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from flask import current_app
 from flask import request
 from werkzeug.utils import secure_filename
 from helpers import allowed_file
-from .schema import AnnouncementSchema, AnnouncementImageSchema, CategorySchema
+from .schema import AnnouncementSchema, AnnouncementImageSchema, CategorySchema, RecentlyViewedSchema
 from ext import db
-from .models import Announcement, ImagesAnnoun, Category
+from .models import Announcement, ImagesAnnoun, Category, RecentlyViewed
 from authorization.authorization import token_check
 from authorization.models import User
+from sqlalchemy.sql.expression import func
 home_api = Blueprint('api', __name__)
 
 
@@ -20,13 +21,14 @@ def create_announcement(token):
     files = request.files.getlist('files')
     data = json.loads(request.form['request'])
 
-    announcement_schema = AnnouncementSchema()
+
     image_schema = AnnouncementImageSchema()
     getted_user = User.query.filter(User.token == token).one()
 
     data['user'] = getted_user.id
 
-    announcement = announcement_schema.load(data)
+    announ_schema = AnnouncementSchema()
+    announcement = announ_schema.load(data=data)
 
     db.session.add(announcement)
     db.session.flush()
@@ -59,22 +61,14 @@ def create_announcement(token):
 @token_check
 def update_annotation(token, id):
     files = request.files.getlist('files')
-    data = json.loads(request.form['request'])
+    request_data = json.loads(request.form['request'])
     image_schema = AnnouncementImageSchema()
     getted_user = User.query.filter(User.token == token).one()
 
-    data['user'] = getted_user.id
-    announcement = Announcement.query.get(id)
-
-    if data.get('name'):
-        announcement.name = data['name']
-    if data.get('description'):
-        announcement.description = data['description']
-    if data.get('saled'):
-        announcement.saled = data['saled']
-    if data.get('category'):
-        announcement.category = data['category']
-
+    request_data['user'] = getted_user.id
+    request_data['id'] = id
+    announ_schema = AnnouncementSchema()
+    announcement = announ_schema.load(data=request_data)
     db.session.add(announcement)
     db.session.commit()
 
@@ -127,15 +121,21 @@ def delete_img_annotation(token, id):
 @home_api.route('/delete_annotation/<id>', methods=['POST'])
 @token_check
 def delete_annotation(token, id):
+    getted_user = User.query.filter(User.token == token).one()
     announcement = Announcement.query.get(id)
-    announcement.deleted = True
-    db.session.add(announcement)
-    db.session.commit()
-    return {
-               "result": True
-           }, 200
+    if getted_user.id == announcement.id:
+        announcement.deleted = True
+        db.session.add(announcement)
+        db.session.commit()
+        return {
+                   "result": True
+               }, 200
+    else:
+        return {
+                   "result": False
+               }, 403
 
-@home_api.route('/my_announcements/all_active', methods=['POST'])
+@home_api.route('/my_announcements/all_active', methods=['GET'])
 @token_check
 def all_announcements(token):
     getted_user = User.query.filter(User.token == token).one()
@@ -145,7 +145,7 @@ def all_announcements(token):
 
     return {"announcement": all}, 200
 
-@home_api.route('/my_announcements/deleted', methods=['POST'])
+@home_api.route('/my_announcements/deleted', methods=['GET'])
 @token_check
 def deleted_announcements(token):
     getted_user = User.query.filter(User.token == token).one()
@@ -156,7 +156,7 @@ def deleted_announcements(token):
     return {"announcement": all}, 200
 
 
-@home_api.route('/my_announcements/saled', methods=['POST'])
+@home_api.route('/my_announcements/saled', methods=['GET'])
 @token_check
 def saled_announcements(token):
     getted_user = User.query.filter(User.token == token).one()
@@ -189,9 +189,54 @@ def all_categories():
 
 
 @home_api.route('/get_announcement/<id>', methods=['GET'])
-def get_announcement(id):
+@token_check
+def get_announcement(token, id):
+
+    getted_user = User.query.filter(User.token == token).one()
     announ = Announcement.query.get(id)
     announcement_schema = AnnouncementSchema()
-    all = announcement_schema.dump(announ)
-    return all, 200
+    announ_dump = announcement_schema.dump(announ)
+    if getted_user.id == announ.user:
+        return jsonify(announ_dump), 200
+    else:
+        recently = RecentlyViewed(user=getted_user.id, announcement=announ.id)
+        db.session.add(recently)
+        db.session.commit()
+        return jsonify(announ_dump), 200
 
+
+
+@home_api.route('/announcements_from_category/<id>', methods=['GET'])
+@token_check
+def announcements_from_category(token, id):
+    announ = Announcement.query.filter(Announcement.category == id)
+    announcement_schema = AnnouncementSchema()
+    announ_dump = announcement_schema.dump(announ, many=True)
+    return jsonify(announ_dump), 200
+
+
+@home_api.route('/recently_viewed', methods=['GET'])
+@token_check
+def recently_viewed(token):
+    getted_user = User.query.filter(User.token == token).one()
+    announcments_disctinct = RecentlyViewed.query.filter(RecentlyViewed.user == getted_user.id).distinct(RecentlyViewed.announcement).subquery()
+    announcments = RecentlyViewed.query.filter(RecentlyViewed.id == announcments_disctinct.c.id).order_by(RecentlyViewed.created.desc()).limit(10)
+
+    announcement_schema = RecentlyViewedSchema()
+    print(announcement_schema)
+    announ_dump = announcement_schema.dump(announcments, many=True)
+    return jsonify(announ_dump), 200
+
+
+
+
+@home_api.route('/recommendation_from_r_v', methods=['GET'])
+@token_check
+def recommendation_from_r_v(token):
+    getted_user = User.query.filter(User.token == token).one()
+    recently_viewed = RecentlyViewed.query.filter(RecentlyViewed.user == getted_user.id).distinct(RecentlyViewed.announcement).subquery()
+    get_announcements = Announcement.query.filter(Announcement.id == recently_viewed.c.announcement).subquery()
+    recommendation = Announcement.query.filter(Announcement.category == get_announcements.c.category, Announcement.user != getted_user.id).order_by(func.random()).limit(10)
+    announcement_schema = AnnouncementSchema()
+    announ_dump = announcement_schema.dump(recommendation, many=True)
+    return jsonify(announ_dump), 200
