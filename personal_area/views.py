@@ -28,7 +28,7 @@ def create_personal_area(token):
             return {'error': 'Personal_area not found'}, 401
         check_personal_area = db.session.query(Personal_area).filter_by(id_user=get_user.id).first()
         if not check_personal_area:
-            try:
+
                 personal_area_schema = Personal_area_schema()
                 data['id_user'] = get_user.id
                 personal_area = personal_area_schema.load(data)
@@ -68,8 +68,7 @@ def create_personal_area(token):
 
                 db.session.commit()
                 return {'message': 'successfully!'}, 201
-            except:
-                return {'message': 'error create'}, 401
+
         return {'error': 'Personal_area is already registered'}, 200
     return {'error': 'Empty fields'}, 400
 
