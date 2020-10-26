@@ -13,7 +13,7 @@ def token_check(function_to_decorate):
     def decorated(*args, **kwargs):
         token = None
         # jwt is passed in the request header
-        if 'пше ' in request.headers:
+        if 'x-access-token' in request.headers:
             token = request.headers['x-access-token']
             # return 401 if token is not passed
         if not token:
