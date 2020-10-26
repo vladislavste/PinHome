@@ -23,6 +23,7 @@ def create_announcement(token):
 
 
     image_schema = AnnouncementImageSchema()
+    print(1, token)
     getted_user = User.query.filter(User.token == token).one()
 
     data['user'] = getted_user.id

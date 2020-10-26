@@ -19,3 +19,4 @@ class Config:
             'secret': '32b05f9979c1a1bb7632e31f216e38cb'
         }
     }
+    SECRET_KEY = 'lolkekazaza'

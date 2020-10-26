@@ -1,9 +1,11 @@
-from flask import Blueprint, request, jsonify, make_response
+from flask import Blueprint, request, jsonify, make_response, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from authorization.models import User, User_social
 from ext import db
 import uuid
 from authorization.authorization import token_check, OAuthSignIn
+import datetime
+import jwt
 
 authorization = Blueprint('authorization', __name__)
 
@@ -16,11 +18,15 @@ def sign_in():
         check_password = check_password_hash(user.password, data['password'])
         if check_password:
             get_user = User.query.filter(User.token == user.token).one()
+            token = jwt.encode(
+                {'public_id': user.token, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
+                current_app.config['SECRET_KEY'])
             res = make_response({
                 'id': get_user.id,
-                'have_personal_area': get_user.have_personal_area
+                'have_personal_area': get_user.have_personal_area,
+                'token': token.decode('UTF-8')
             })
-            res.set_cookie('token', user.token, max_age=60*60)
+
             return res
         return jsonify({'error': 'Incorrect username or password'}), 401
     return jsonify({'error': 'User not found'}), 401

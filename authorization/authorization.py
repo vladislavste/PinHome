@@ -3,24 +3,37 @@ from functools import wraps
 from authorization.models import User
 from rauth import OAuth1Service, OAuth2Service
 from flask import url_for, redirect, request
+from flask_jwt import JWT, jwt_required, current_identity
 import json
+import jwt
 
 
 def token_check(function_to_decorate):
     @wraps(function_to_decorate)
-    def decorator(*args, **kwargs):
+    def decorated(*args, **kwargs):
         token = None
-        if request.cookies.get('token'):
-            token = request.cookies.get('token')
-        else:
-            return jsonify({'error': 'You are not authorized!'}), 401
-        get_user = User.query.filter(User.token == token).one()
-        if get_user.is_active == 0:
-            return {'error': 'User not found'}, 401
+        # jwt is passed in the request header
+        if 'пше ' in request.headers:
+            token = request.headers['x-access-token']
+            # return 401 if token is not passed
         if not token:
-            return jsonify({'error': 'You are not authorized!'}), 401
-        return function_to_decorate(token, *args, **kwargs)
-    return decorator
+            return jsonify({'message': 'SOSAI PISOS I DAI MNE TOKEN'}), 401
+
+        try:
+            # decoding the payload to fetch the stored details
+            data = jwt.decode(token, current_app.config['SECRET_KEY'])
+            current_user = User.query \
+                .filter_by(token=data['public_id']) \
+                .first()
+
+        except:
+            return jsonify({
+                'message': 'SOSAI PISOS TVOI TOKEN GOVNO'
+            }), 401
+        # returns the current logged in users contex to the routes
+        return function_to_decorate(current_user.token, *args, **kwargs)
+
+    return decorated
 
 
 class OAuthSignIn(object):
