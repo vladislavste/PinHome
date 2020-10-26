@@ -22,7 +22,10 @@ def create_personal_area(token):
     if 'surname' in data and 'name' in data:
         if data['surname'] == '' or data['name'] == '':
             return {'error': 'Empty fields'}, 400
-        get_user = User.query.filter(User.token == token).one()
+        try:
+            get_user = User.query.filter(User.token == token).one()
+        except:
+            return {'error': 'Personal_area not found'}, 401
         check_personal_area = db.session.query(Personal_area).filter_by(id_user=get_user.id).first()
         if not check_personal_area:
             try:
@@ -92,7 +95,10 @@ def read_personal_area(token, id):
 @personal_area.route('/', methods=['PUT'])
 @token_check
 def update_personal_area(token):
-    get_user = User.query.filter(User.token == token).one()
+    try:
+        get_user = User.query.filter(User.token == token).one()
+    except:
+        return {'error': 'Personal_area not found'}, 401
     personal_area = db.session.query(Personal_area).filter_by(id_user=get_user.id).first()
     if personal_area:
         if request.form:
@@ -153,7 +159,10 @@ def update_personal_area(token):
 @personal_area.route('/', methods=['DELETE'])
 @token_check
 def delete_personal_area(token):
-    get_user = User.query.filter(User.token == token).one()
+    try:
+        get_user = User.query.filter(User.token == token).one()
+    except:
+        return {'error': 'Personal_area not found'}, 401
     user = User.query.get(get_user.id)
     user.is_active = 0
     db.session.add(user)

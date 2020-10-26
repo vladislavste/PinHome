@@ -20,3 +20,10 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.id}>'
+
+
+class User_social(db.Model):
+    __tablename__ = 'users_social'
+    id = db.Column(db.Integer, primary_key=True)
+    social_id = db.Column(db.String(200), nullable=False, unique=True)
+    id_user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
