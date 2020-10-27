@@ -19,8 +19,12 @@ def sign_in():
         if check_password:
             get_user = User.query.filter(User.token == user.token).one()
             token = jwt.encode(
-                {'public_id': user.token, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
-                current_app.config['SECRET_KEY'])
+                {
+                    'public_id': user.token,
+                    'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+                },
+                current_app.config['SECRET_KEY']
+            )
             res = make_response({
                 'id': get_user.id,
                 'have_personal_area': get_user.have_personal_area,
@@ -58,11 +62,18 @@ def oauth_callback(provider):
 
         db.session.commit()
     get_user = User.query.filter(User.id == user_social.id_user).one()
+    token = jwt.encode(
+        {
+            'public_id': get_user.token,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        },
+        current_app.config['SECRET_KEY']
+    )
     res = make_response({
         'id': get_user.id,
-        'have_personal_area': get_user.have_personal_area
+        'have_personal_area': get_user.have_personal_area,
+        'token': token.decode('UTF-8')
     })
-    res.set_cookie('token', get_user.token, max_age=60 * 60)
     return res
 
 
@@ -86,7 +97,14 @@ def sign_up():
 @authorization.route('/logout', methods=['GET'])
 @token_check
 def logout(token):
-    res = make_response("You are logout")
-    res.set_cookie('token', token, max_age=0)
+    get_user = User.query.filter(User.token == token).one()
+    new_token = str(uuid.uuid4())
+    user = User.query.get(get_user.id)
+    user.token = new_token
+    db.session.add(user)
+    db.session.commit()
+    res = make_response({
+        'message': 'You are logout'
+    })
     return res
 
