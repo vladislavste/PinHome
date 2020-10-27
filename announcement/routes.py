@@ -222,9 +222,7 @@ def recently_viewed(token):
     getted_user = User.query.filter(User.token == token).one()
     announcments_disctinct = RecentlyViewed.query.filter(RecentlyViewed.user == getted_user.id).distinct(RecentlyViewed.announcement).subquery()
     announcments = RecentlyViewed.query.filter(RecentlyViewed.id == announcments_disctinct.c.id).order_by(RecentlyViewed.created.desc()).limit(10)
-
     announcement_schema = RecentlyViewedSchema()
-    print(announcement_schema)
     announ_dump = announcement_schema.dump(announcments, many=True)
     return jsonify(announ_dump), 200
 
@@ -241,3 +239,5 @@ def recommendation_from_r_v(token):
     announcement_schema = AnnouncementSchema()
     announ_dump = announcement_schema.dump(recommendation, many=True)
     return jsonify(announ_dump), 200
+
+

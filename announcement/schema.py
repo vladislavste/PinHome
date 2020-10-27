@@ -53,6 +53,8 @@ class AnnouncementSchema(ModelSchema):
     user = fields.Integer(required=True)
     images = fields.Nested(AnnouncementImageSchema, many=True)
     want = fields.Nested(WantSchema, many=True)
+    city = fields.String(required=False)
+    address = fields.String(required=False)
 
 
 class CategoryWithAnnouncmentsSchema(ModelSchema):

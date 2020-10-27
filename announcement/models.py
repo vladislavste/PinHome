@@ -20,7 +20,6 @@ class ImagesAnnoun(db.Model):
 
 
 class Announcement(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(5000), nullable=False)
@@ -29,11 +28,11 @@ class Announcement(db.Model):
     created = db.Column(DateTime(timezone=True), server_default=func.now())
     deleted = db.Column(db.Boolean, default=False)
     user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    city = db.Column(db.String(200), nullable=True)
+    address = db.Column(db.String(500), nullable=True)
     images = relationship("ImagesAnnoun", backref="images_announ")
     want = relationship("Want", backref="want")
     recently_viewed = relationship("RecentlyViewed", backref="recently_viewed")
-
-
 
 
 class Want(db.Model):
@@ -41,7 +40,6 @@ class Want(db.Model):
     announcement = db.Column(db.Integer, db.ForeignKey('announcement.id'), nullable=False)
     category = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     created = db.Column(DateTime(timezone=True), server_default=func.now())
-
 
 
 class Deal(db.Model):
@@ -57,4 +55,3 @@ class RecentlyViewed(db.Model):
     user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     announcement = db.Column(db.Integer, db.ForeignKey('announcement.id'), nullable=False)
     created = db.Column(DateTime(timezone=True), server_default=func.now())
-
