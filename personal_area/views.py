@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from flask import Blueprint, request, current_app
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from authorization.authorization import token_check
 from authorization.models import User
@@ -158,12 +159,27 @@ def update_personal_area(token):
 @personal_area.route('/', methods=['DELETE'])
 @token_check
 def delete_personal_area(token):
-    try:
-        get_user = User.query.filter(User.token == token).one()
-    except:
-        return {'error': 'Personal_area not found'}, 401
+    get_user = User.query.filter(User.token == token).one()
     user = User.query.get(get_user.id)
     user.is_active = 0
     db.session.add(user)
     db.session.commit()
     return {"message": 'User is deleted'}, 200
+
+
+@personal_area.route('/change_password', methods=['POST'])
+@token_check
+def change_password(token):
+    data = request.get_json()
+    if data['old_password'] != '' and data['new_password'] != '':
+        get_user = User.query.filter(User.token == token).one()
+        check_password = check_password_hash(get_user.password, data['old_password'])
+        if check_password:
+            user = User.query.get(get_user.id)
+            hash_password = generate_password_hash(data['new_password'], method='sha256')
+            user.password = hash_password
+            db.session.add(user)
+            db.session.commit()
+            return {'message': 'Password changed'}, 200
+        return {'error': 'Old password incorrect'}, 400
+    return {'error': 'Empty fields'}, 400
