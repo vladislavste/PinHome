@@ -5,8 +5,8 @@ class Config:
     DEBUG = False
     TESTING = False
     #SQLALCHEMY_DATABASE_URI = 'postgres://pinhome:23kP6Zu@localhost:5432/pinhome'
-    #SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://postgres:2452020@localhost:5432/pinhome'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://postgres:2452020@localhost:5432/pinhome'
+    #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JSON_SORT_KEYS = False
     PROJECT_HOME = os.path.dirname(os.path.realpath(__file__)).replace('/settings', '')
@@ -21,6 +21,14 @@ class Config:
         'twitter': {
             'id': '3RzWQclolxWZIMq5LJqzRZPTl',
             'secret': 'm9TEd58DSEtRrZHpz2EjrV9AhsBRxKMo8m3kuIZj3zLwzwIimt'
+        },
+        'google': {
+            'id': '157583496567-p15f3jnijg9oe9d29erpveomb58mr4n0.apps.googleusercontent.com',
+            'secret': 'O_piVp3zrWtJCI1bv29ohmRA'
+        },
+        'yandex': {
+            'id': '52e6d831ff30406aa6d6000e127d1cde',
+            'secret': '749bec84b7c8436b899998a665b66f1c'
         }
     }
     SECRET_KEY = 'lolkekazaza'
