@@ -1,6 +1,7 @@
 from ext import db
 from sqlalchemy import DateTime
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 
 
 class Charities(db.Model):
@@ -9,6 +10,10 @@ class Charities(db.Model):
     name = db.Column(db.String(200), nullable=False, unique=True)
     is_active = db.Column(db.Boolean, default=1, nullable=False)
     description = db.Column(db.String(5000), nullable=False)
+    charities_address = relationship("Charities_address", backref="charities_address")
+    charities_contacts = relationship("Charities_contacts", backref="charities_contacts")
+    charities_social_networks = relationship("Charities_social_networks", backref="charities_social_networks")
+    images_charities = relationship("Images_charities", backref="images_charities")
 
 
 class Charities_address(db.Model):

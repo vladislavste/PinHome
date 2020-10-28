@@ -4,16 +4,6 @@ from .models import Charities, Images_charities, Charities_address, Charities_co
 from ext import db
 
 
-class Charities_schema(ModelSchema):
-    class Meta(ModelSchema.Meta):
-        model = Charities
-        sqla_session = db.session
-
-    id = fields.Integer(dump_only=False)
-    name = fields.String(required=True)
-    description = fields.String(required=True)
-
-
 class Charities_social_networks_schema(ModelSchema):
     class Meta(ModelSchema.Meta):
         model = Charities_social_networks
@@ -53,3 +43,19 @@ class Images_charities_schema(ModelSchema):
     image_path = fields.String(required=True)
     created = fields.Date(dump_only=True)
     id_charities = fields.Integer(required=True)
+
+
+class Charities_schema(ModelSchema):
+    class Meta(ModelSchema.Meta):
+        model = Charities
+        sqla_session = db.session
+        include_relationships = True
+        load_instance = True
+
+    id = fields.Integer(dump_only=False)
+    name = fields.String(required=True)
+    description = fields.String(required=True)
+    charities_address = fields.Nested(Charities_address_schema, many=True)
+    charities_contacts = fields.Nested(Charities_contacts_schema, many=True)
+    charities_social_networks = fields.Nested(Charities_social_networks_schema, many=True)
+    images_charities = fields.Nested(Images_charities_schema, many=True)
