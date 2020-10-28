@@ -120,4 +120,11 @@ def update_charities(token, id):
 @charities.route('/<id>', methods=['DELETE'])
 @token_check
 def delete_charities(token, id):
-    pass
+    get_user = User.query.filter(User.token == token).one()
+    if get_user.username == 'Admin' or get_user.username == 'admin':
+        сharities = Charities.query.get(id)
+        сharities.is_active = 0
+        db.session.add(сharities)
+        db.session.commit()
+        return {"message": 'User is deleted'}, 200
+    return {'error': 'You not admin!'}, 401
