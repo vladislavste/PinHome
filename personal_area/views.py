@@ -76,9 +76,9 @@ def create_personal_area(token):
 
 @personal_area.route('/<id>', methods=['GET'])
 @token_check
-def read_personal_area(token, id):
+def read_personal_area_by_id(token, id):
     try:
-        get_personal_area = Personal_area.query.filter(Personal_area.id == id).one()
+        get_personal_area = Personal_area.query.filter(Personal_area.id_user == id).one()
         personal_area_schema = Personal_area_schema()
         currently_user = personal_area_schema.dump(get_personal_area)
         get_photo = db.session.query(Images_personal_area).filter_by(id_personal_area=get_personal_area.id).first()
@@ -89,7 +89,29 @@ def read_personal_area(token, id):
             'photo': photo,
         }, 200
     except:
+        return {'error': 'Personal area not found'}, 401
+
+
+@personal_area.route('/', methods=['GET'])
+@token_check
+def read_personal_area(token):
+    try:
+        get_user = User.query.filter(User.token == token).one()
+    except:
         return {'error': 'User not found'}, 401
+    try:
+        get_personal_area = Personal_area.query.filter(Personal_area.id_user == get_user.id).one()
+        personal_area_schema = Personal_area_schema()
+        currently_user = personal_area_schema.dump(get_personal_area)
+        get_photo = db.session.query(Images_personal_area).filter_by(id_personal_area=get_personal_area.id).first()
+        image_schema = Images_personal_area_schema()
+        photo = image_schema.dump(get_photo)
+        return {
+            'currently_user': currently_user,
+            'photo': photo,
+        }, 200
+    except:
+        return {'error': 'Personal area not found'}, 401
 
 
 @personal_area.route('/', methods=['PUT'])

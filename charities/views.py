@@ -16,7 +16,7 @@ charities = Blueprint('charities', __name__)
 @charities.route('/', methods=['GET'])
 @token_check
 def all_charities(token):
-    query = Charities.query.all()
+    query = Charities.query.filter(Charities.is_active == True).all()
     charities_schema = Charities_schema()
     all = charities_schema.dump(query, many=True)
     return {"charities": all}, 200
@@ -124,7 +124,7 @@ def update_charities(token, id):
             data = json.loads(request.form['charities'])
             data['id'] = id
             сharities_schema = Charities_schema()
-            charities = сharities_schema.load(data=data)
+            charities = сharities_schema.load(data=json.dumps(data), many=True)
             db.session.add(charities)
             db.session.commit()
             try:
