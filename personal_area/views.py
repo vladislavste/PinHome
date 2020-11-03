@@ -92,6 +92,25 @@ def read_personal_area_by_id(token, id):
         return {'error': 'Personal area not found'}, 401
 
 
+@personal_area.route('/image', methods=['GET'])
+@token_check
+def read_current_user_image(token):
+    try:
+        get_user = User.query.filter(User.token == token).one()
+    except:
+        return {'error': 'User not found'}, 401
+    try:
+        get_personal_area = Personal_area.query.filter(Personal_area.id_user == get_user.id).one()
+        get_photo = db.session.query(Images_personal_area).filter_by(id_personal_area=get_personal_area.id).first()
+        image_schema = Images_personal_area_schema()
+        photo = image_schema.dump(get_photo)
+        return {
+            'photo': photo,
+        }, 200
+    except:
+        return {'error': 'Personal area not found'}, 401
+
+
 @personal_area.route('/', methods=['GET'])
 @token_check
 def read_personal_area(token):
