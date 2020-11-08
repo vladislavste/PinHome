@@ -46,7 +46,7 @@ def create_announcement(token):
 
             file.save(os.path.join(current_app.config['UPLOAD_FOLDER_ANNOUN'], new_filename))
             img_data = {
-                "image_path": f'/images/uploads_annoum/{new_filename}',
+                "image_path": f'/images/announcement/{new_filename}',
                 "announcement": id
             }
             db_image = image_schema.load(img_data)
