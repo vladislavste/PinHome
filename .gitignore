@@ -163,3 +163,4 @@ wsgi.py
 /images/announcement/*
 /images/charities/*
 /images/personal_area/*
+/migrations/versions/*

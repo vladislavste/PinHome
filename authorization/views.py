@@ -21,7 +21,7 @@ def sign_in():
             token = jwt.encode(
                 {
                     'public_id': user.token,
-                    'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+                    'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=9000000)
                 },
                 current_app.config['SECRET_KEY']
             )

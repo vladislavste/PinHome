@@ -8,8 +8,9 @@ from ext import db
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    parent = db.Column(db.Integer, nullable=True)
+    parent_id = db.Column(db.Integer, nullable=True)
     products = relationship("Announcement", backref="announcement")
+    want = relationship("Want", backref="want_cat")
 
 
 class ImagesAnnoun(db.Model):
@@ -26,28 +27,42 @@ class Announcement(db.Model):
     saled = db.Column(db.Boolean, default=False)
     category = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     created = db.Column(DateTime(timezone=True), server_default=func.now())
-    deleted = db.Column(db.Boolean, default=False)
+    reason_id = db.Column(db.Integer, db.ForeignKey('closed.id'), nullable=True)
     user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     city = db.Column(db.String(200), nullable=True)
     address = db.Column(db.String(500), nullable=True)
     images = relationship("ImagesAnnoun", backref="images_announ")
     want = relationship("Want", backref="want")
     recently_viewed = relationship("RecentlyViewed", backref="recently_viewed")
-
+    reason = relationship("Closed", backref="closed")
+    delete = db.Column(db.Boolean, default=False, unique=False)
 
 class Want(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     announcement = db.Column(db.Integer, db.ForeignKey('announcement.id'), nullable=False)
     category = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    str_want = db.Column(db.String(300), nullable=True)
     created = db.Column(DateTime(timezone=True), server_default=func.now())
 
 
-class Deal(db.Model):
+
+class Closed(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    first = db.Column(db.Integer, db.ForeignKey('announcement.id'), nullable=False)
-    second = db.Column(db.Integer, db.ForeignKey('announcement.id'), nullable=False)
-    status = db.Column(db.Boolean, default=False)
+    type = db.Column(db.Integer, db.ForeignKey('type_close.id'), nullable=False)
+    reason = db.Column(db.Integer, db.ForeignKey('reason_close.id'), nullable=False)
     created = db.Column(DateTime(timezone=True), server_default=func.now())
+    reason_close = relationship("ReasonClose", backref="reason_closed")
+    type_close = relationship("TypeClose", backref="type_closed")
+
+
+
+class TypeClose(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+
+class ReasonClose(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
 
 
 class RecentlyViewed(db.Model):
