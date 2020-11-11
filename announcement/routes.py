@@ -274,3 +274,26 @@ def close_deal(token, id):
         return {'result': True}
     except:
         return {'result': False}
+    
+@home_api.route('/edit_want/<id>', methods=['POST'])
+@token_check
+def edit_want(token, id):
+    request_data = request.get_json()
+    request_data['id'] = id
+    want_schema = WantSchema()
+    want = want_schema.load(data=request_data)
+    db.session.add(want)
+    db.session.commit()
+    return jsonify({
+        "result": True
+    }), 200
+
+@home_api.route('/delete_want/<id>', methods=['DELETE'])
+@token_check
+def delete_want(token, id):
+    want = Want.query.get(id)
+    db.session.delete(want)
+    db.session.commit()
+    return jsonify({
+        "result": True
+    }), 200
