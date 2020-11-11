@@ -45,7 +45,7 @@ class WantSchema(ModelSchema):
         include_relationships = True
         load_instance = True
 
-    id = fields.Integer(dump_only=True)
+    id = fields.Integer(required=True)
     announcement = fields.Integer(load_only=True, required=False)
     str_want = fields.String(required=True)
     category_id = fields.Integer(load_only=True, required=True)
