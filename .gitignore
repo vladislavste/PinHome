@@ -164,3 +164,4 @@ wsgi.py
 /images/charities/*
 /images/personal_area/*
 /migrations/versions/*
+/migrations/*
