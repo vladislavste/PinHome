@@ -156,6 +156,7 @@ Temporary Items
 .apdisk
 
 .idea/
+migrations/
 /index.html
 /source.json
 wsgi.py

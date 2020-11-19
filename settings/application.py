@@ -6,6 +6,7 @@ from ext import register_extensions
 from announcement.routes import home_api
 from personal_area.views import personal_area
 from charities.views import charities
+from chat.views import chat
 
 
 def create_application():
@@ -18,5 +19,6 @@ def create_application():
     app.register_blueprint(home_api, url_prefix='/api')
     app.register_blueprint(personal_area, url_prefix='/personal_area')
     app.register_blueprint(charities, url_prefix='/charities')
+    app.register_blueprint(chat, url_prefix='/chat')
 
     return app
