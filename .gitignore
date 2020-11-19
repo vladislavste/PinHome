@@ -160,3 +160,9 @@ migrations/
 /index.html
 /source.json
 wsgi.py
+
+/images/announcement/*
+/images/charities/*
+/images/personal_area/*
+/migrations/versions/*
+/migrations/*
