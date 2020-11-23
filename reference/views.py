@@ -16,7 +16,18 @@ reference = Blueprint('reference', __name__)
 @reference.route('/', methods=['GET'])
 @token_check
 def all_reference(token):
-    query = Reference.query.all()
+    query = Reference.query.first()
     reference_schema = ReferenceSchema()
-    all = reference_schema.dump(query, many=True)
+    all = reference_schema.dump(query)
     return {"reference": all}, 200
+
+
+@reference.route('/', methods=['POST'])
+@token_check
+def create_reference(token):
+    data = request.get_json()
+    create = Reference(id_charity=data['id_charity'], id_support=data['id_support'],
+                       id_about_service=data['id_about_service'])
+    db.session.add(create)
+    db.session.commit()
+    return {'message': 'good!'}, 201

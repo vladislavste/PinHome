@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from authorization.authorization import token_check
 from authorization.models import User
 from helpers import allowed_file
-from charities.models import Charities, Charities_address, Charities_contacts, Charities_social_networks, Images_charities
+from charities.models import Charities, Charity, Charities_address, Charities_contacts, Charities_social_networks, Images_charities
 from .schema import Charities_address_schema, Charities_contacts_schema, Charities_social_networks_schema, Images_charities_schema, Charities_schema
 import json
 from uuid import uuid4
@@ -99,7 +99,7 @@ def create_charities(token):
                     db.session.add(db_image)
             else:
                 img_data = {
-                    "image_path": f'/images/default.jpg',
+                    "image_path": f'/images/charities.png',
                     "id_charities": id
                 }
                 db_image = image_schema.load(img_data)
@@ -171,3 +171,12 @@ def delete_charities(token, id):
         db.session.commit()
         return {"message": 'Charities is deleted'}, 200
     return {'error': 'You not admin!'}, 401
+
+
+@charities.route('/create_charity', methods=['POST'])
+@token_check
+def create_charity(token):
+    create = Charity()
+    db.session.add(create)
+    db.session.commit()
+    return {'message': 'good!'}, 201

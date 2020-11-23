@@ -20,3 +20,13 @@ def support_inforamtion(token):
     support_schema = SupportSchema()
     all = support_schema.dump(query)
     return {"support": all}, 200
+
+
+@support.route('/', methods=['POST'])
+@token_check
+def create_support_inforamtion(token):
+    data = request.get_json()
+    create = Support(description=data['description'])
+    db.session.add(create)
+    db.session.commit()
+    return {'message': 'good!'}, 201

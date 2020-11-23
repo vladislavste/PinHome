@@ -20,3 +20,13 @@ def about_service_inforamtion(token):
     about_service_schema = AboutServiceSchema()
     all = about_service_schema.dump(query)
     return {"about_service": all}, 200
+
+
+@about_service.route('/', methods=['POST'])
+@token_check
+def create_about_service_inforamtion(token):
+    data = request.get_json()
+    create = AboutService(description=data['description'])
+    db.session.add(create)
+    db.session.commit()
+    return {'message': 'good!'}, 201

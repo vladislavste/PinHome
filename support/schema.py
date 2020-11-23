@@ -10,5 +10,6 @@ class SupportSchema(ModelSchema):
         sqla_session = db.session
 
     id = fields.Integer(dump_only=True)
+    name = fields.String(required=True)
     image_path = fields.String(required=True)
     description = fields.String(required=True)

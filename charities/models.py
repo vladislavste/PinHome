@@ -4,12 +4,21 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
 
+class Charity(db.Model):
+    __tablename__ = 'charity'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, default='Социальные и экологические проекты', nullable=True)
+    image_path = db.Column(db.String, default='/images/charity.png', nullable=True)
+    charities = relationship("Charities", backref="charities")
+
+
 class Charities(db.Model):
     __tablename__ = 'charities'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False, unique=True)
     is_active = db.Column(db.Boolean, default=1, nullable=False)
     description = db.Column(db.String(5000), nullable=False)
+    id_charity = db.Column(db.Integer, db.ForeignKey('charity.id'), nullable=False, unique=False)
     charities_address = relationship("Charities_address", backref="charities_address")
     charities_contacts = relationship("Charities_contacts", backref="charities_contacts")
     charities_social_networks = relationship("Charities_social_networks", backref="charities_social_networks")
