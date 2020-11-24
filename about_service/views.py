@@ -16,7 +16,7 @@ about_service = Blueprint('about_service', __name__)
 @about_service.route('/', methods=['GET'])
 @token_check
 def about_service_inforamtion(token):
-    query = AboutService.query.all()
+    query = AboutService.query.first()
     about_service_schema = AboutServiceSchema()
     all = about_service_schema.dump(query)
     return {"about_service": all}, 200
