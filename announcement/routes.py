@@ -7,9 +7,9 @@ from flask import request
 from werkzeug.utils import secure_filename
 from helpers import allowed_file
 from .schema import AnnouncementSchema, AnnouncementImageSchema, CategorySchema, RecentlyViewedSchema, TypeCloseSchema, \
-    ReasonCloseSchema, ClosedSchema, AllCategorySchema
+    ReasonCloseSchema, ClosedSchema, AllCategorySchema, WantSchema
 from ext import db
-from .models import Announcement, ImagesAnnoun, Category, RecentlyViewed, TypeClose, ReasonClose
+from .models import Announcement, ImagesAnnoun, Category, RecentlyViewed, TypeClose, ReasonClose, Want
 from authorization.authorization import token_check
 from authorization.models import User
 from sqlalchemy.sql.expression import func
@@ -297,3 +297,12 @@ def delete_want(token, id):
     return jsonify({
         "result": True
     }), 200
+
+@home_api.route('/wants_for_user/<id>', methods=['GET'])
+@token_check
+def wants_for_user(token, id):
+    announs_user = Announcement.query.filter(Announcement.user == id).subquery()
+    wants = Want.query.filter(Want.announcement == announs_user.c.id).all()
+    wants_schema = WantSchema()
+    wants_dump = wants_schema.dump(wants, many=True)
+    return jsonify(wants_dump), 200
