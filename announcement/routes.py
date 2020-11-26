@@ -307,9 +307,9 @@ def wants_for_user(token, id):
     wants_dump = wants_schema.dump(wants, many=True)
     return jsonify(wants_dump), 200
 
-@home_api.route('/wants_for_current_user/<id>', methods=['GET'])
+@home_api.route('/wants_for_current_user', methods=['GET'])
 @token_check
-def wants_for_current_user(token, id):
+def wants_for_current_user(token):
     user = User.query.filter(User.token == token).subquery()
     announs_user = Announcement.query.filter(Announcement.user == user.c.id).subquery()
     wants = Want.query.filter(Want.announcement == announs_user.c.id).all()
