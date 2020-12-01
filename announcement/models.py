@@ -36,6 +36,7 @@ class Announcement(db.Model):
     recently_viewed = relationship("RecentlyViewed", backref="recently_viewed")
     reason = relationship("Closed", backref="closed")
     delete = db.Column(db.Boolean, default=False, unique=False)
+    no_exchange = db.Column(db.Boolean, default=False, unique=False)
 
 class Want(db.Model):
     id = db.Column(db.Integer, primary_key=True)
