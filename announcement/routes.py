@@ -13,7 +13,8 @@ from .models import Announcement, ImagesAnnoun, Category, RecentlyViewed, TypeCl
 from authorization.authorization import token_check
 from authorization.models import User
 from sqlalchemy.sql.expression import func
-
+import re
+import itertools
 home_api = Blueprint('api', __name__)
 
 
