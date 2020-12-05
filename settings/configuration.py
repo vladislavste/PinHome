@@ -4,7 +4,8 @@ import os
 class Config:
     DEBUG = False
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = 'postgres://pinhome:23kP6Zu@localhost:5432/pinhome'
+    # SQLALCHEMY_DATABASE_URI = 'postgres://pinhome:23kP6Zu@localhost:5432/pinhome'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://pinhouse:pinhouse@localhost:5432/pinhouse'
     #SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://postgres:2452020@localhost:5432/pinhome'
     #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
