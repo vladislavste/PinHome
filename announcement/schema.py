@@ -47,7 +47,6 @@ class WantSchema(ModelSchema):
 
     id = fields.Integer(required=False)
     announcement = fields.Integer(load_only=True, required=False)
-    str_want = fields.String(required=True)
     category = fields.Integer(load_only=True, required=True)
     want_cat = fields.Nested(CategorySchema, dump_only=True, only=["id", "name"])
 
@@ -123,6 +122,7 @@ class AnnouncementSchema(ModelSchema):
     address = fields.String(required=False)
     reason = fields.Nested(ClosedNestedSchema, dump_only=True)
     no_exchange = fields.Boolean(required=False)
+    str_want = fields.String(required=False)
 
 class RecentlyViewedSchema(ModelSchema):
     class Meta(ModelSchema.Meta):

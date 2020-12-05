@@ -321,19 +321,19 @@ def wants_for_current_user(token):
 @home_api.route('/recommended_for_want/<id>', methods=['GET'])
 @token_check
 def recommended_for_want(token, id):
-    qs = Want.query.filter(Want.announcement == id).all()
     user = User.query.filter(User.token == token).one()
     for_result = list()
-    for item in qs:
-        str = item.str_want
-        reg = re.compile('[^-zA-Z а-яА-Я]')
-        words = reg.sub('', str)
-        list_of_words = words.split(' ')
-        for word in list_of_words:
-            descr = Announcement.query.filter(Announcement.description.ilike('%' + word + '%'), Announcement.user != user.id).all()
-            name = Announcement.query.filter(Announcement.name.ilike('%' + word + '%'), Announcement.user != user.id).all()
-            all_announs = list(set(descr + name))
-            for_result.append(all_announs)
+    announ = Announcement.query.get(id)
+
+    str = announ.str_want
+    reg = re.compile('[^-zA-Z а-яА-Я]')
+    words = reg.sub('', str)
+    list_of_words = words.split(' ')
+    for word in list_of_words:
+        descr = Announcement.query.filter(Announcement.description.ilike('%' + word + '%'), Announcement.user != user.id).all()
+        name = Announcement.query.filter(Announcement.name.ilike('%' + word + '%'), Announcement.user != user.id).all()
+        all_announs = list(set(descr + name))
+        for_result.append(all_announs)
 
     for_result = list(set(itertools.chain(*for_result)))
     announcement_schema = AnnouncementSchema()

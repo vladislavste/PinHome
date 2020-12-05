@@ -37,12 +37,13 @@ class Announcement(db.Model):
     reason = relationship("Closed", backref="closed")
     delete = db.Column(db.Boolean, default=False, unique=False)
     no_exchange = db.Column(db.Boolean, default=False, unique=False)
+    str_want = db.Column(db.String(300), nullable=True)
+
 
 class Want(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     announcement = db.Column(db.Integer, db.ForeignKey('announcement.id'), nullable=False)
     category = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    str_want = db.Column(db.String(300), nullable=True)
     created = db.Column(DateTime(timezone=True), server_default=func.now())
 
 
