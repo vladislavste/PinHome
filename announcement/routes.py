@@ -158,17 +158,29 @@ def saled_announcements(token):
 
 @home_api.route('/search_announcements', methods=['GET'])
 def search_announcements():
+    filters = list()
+
+    filter_category = Announcement.query.filter(Announcement.category == request.args.get('category')).filter().subquery()
     if request.args.get('category'):
-        all_announs = Announcement.query.filter(Announcement.name.ilike('%' + request.args.get('query') + '%'),
-                                                Announcement.category == request.args.get('category')).filter().all()
-        announcement_schema = AnnouncementSchema()
-        all = announcement_schema.dump(all_announs, many=True)
-        return {"announcement": all}, 200
-    else:
-        all_announs = Announcement.query.filter(Announcement.name.ilike('%' + request.args.get('query') + '%')).all()
-        announcement_schema = AnnouncementSchema()
-        all = announcement_schema.dump(all_announs, many=True)
-        return {"announcement": all}, 200
+        filters.append(Announcement.category == filter_category.c.category)
+
+    filter_exchange = Announcement.query.filter(Announcement.no_exchange == request.args.get('exchange')).filter().subquery()
+    if request.args.get('exchange'):
+        filters.append(Announcement.no_exchange == filter_exchange.c.no_exchange)
+
+    filter_city = Announcement.query.filter(Announcement.city == request.args.get('city')).filter().subquery()
+    if request.args.get('city'):
+        filters.append(Announcement.city == filter_city.c.city)
+
+    filter_address = Announcement.query.filter(Announcement.address == request.args.get('address')).filter().subquery()
+    if request.args.get('address'):
+        filters.append(Announcement.address == filter_address.c.address)
+    description = Announcement.query.filter(Announcement.description.ilike('%' + request.args.get('query') + '%'),  *filters).all()
+    name = Announcement.query.filter(Announcement.name.ilike('%' + request.args.get('query') + '%'),  *filters).all()
+    all_announs = list(set(description + name))
+    announcement_schema = AnnouncementSchema()
+    all = announcement_schema.dump(all_announs, many=True)
+    return {"announcement": all}, 200
 
 
 @home_api.route('/all_categories', methods=['GET'])
