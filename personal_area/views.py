@@ -245,11 +245,9 @@ def change_password(token):
                'error': 'Empty fields'}, 400
 
 
-@personal_area.route('/get_phone', methods=['GET'])
-@token_check
-def get_phone(token):
-    getted_user = User.query.filter(User.token == token).one()
-    data = db.session.query(Personal_area_schema).filter_by(id_user=getted_user.id).one()
+@personal_area.route('/get_phone/<id>', methods=['GET'])
+def get_phone(id):
+    data = db.session.query(Personal_area).filter_by(id_user=id).one()
     return {
                'phone': data.phone_number
            }, 200
