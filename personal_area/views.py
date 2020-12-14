@@ -3,8 +3,8 @@ import os
 from uuid import uuid4
 
 from flask import Blueprint, request, current_app
-from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 from authorization.authorization import token_check
 from authorization.models import User
@@ -22,56 +22,61 @@ def create_personal_area(token):
     data = json.loads(request.form['request'])
     if 'surname' in data and 'name' in data:
         if data['surname'] == '' or data['name'] == '':
-            return {'error': 'Empty fields'}, 400
+            return {
+                       'error': 'Empty fields'}, 400
         try:
             get_user = User.query.filter(User.token == token).one()
         except:
-            return {'error': 'Personal_area not found'}, 401
+            return {
+                       'error': 'Personal_area not found'}, 401
         check_personal_area = db.session.query(Personal_area).filter_by(id_user=get_user.id).first()
         if not check_personal_area:
 
-                personal_area_schema = Personal_area_schema()
-                data['id_user'] = get_user.id
-                personal_area = personal_area_schema.load(data)
-                db.session.add(personal_area)
-                db.session.flush()
-                id = personal_area.id
+            personal_area_schema = Personal_area_schema()
+            data['id_user'] = get_user.id
+            personal_area = personal_area_schema.load(data)
+            db.session.add(personal_area)
+            db.session.flush()
+            id = personal_area.id
 
-                user = User.query.get(get_user.id)
-                user.have_personal_area = 1
-                db.session.add(user)
+            user = User.query.get(get_user.id)
+            user.have_personal_area = 1
+            db.session.add(user)
 
-                image_schema = Images_personal_area_schema()
+            image_schema = Images_personal_area_schema()
 
-                if request.files.get('photo'):
-                    file = request.files.get('photo')
-                    if file and allowed_file(file.filename):
-                        filename = secure_filename(file.filename)
-                        extension = filename.split()[-1]
-                        new_filename = "upload-{}.{}".format(
-                            uuid4(), extension
-                        )
+            if request.files.get('photo'):
+                file = request.files.get('photo')
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    extension = filename.split()[-1]
+                    new_filename = "upload-{}.{}".format(
+                        uuid4(), extension
+                    )
 
-                        file.save(os.path.join(current_app.config['UPLOAD_FOLDER_PERSONAL_AREA'], new_filename))
-                        img_data = {
-                            "image_path": f'/images/personal_area/{new_filename}',
-                            "id_personal_area": id
-                        }
-                        db_image = image_schema.load(img_data)
-                        db.session.add(db_image)
-                else:
+                    file.save(os.path.join(current_app.config['UPLOAD_FOLDER_PERSONAL_AREA'], new_filename))
                     img_data = {
-                        "image_path": f'/images/default.jpg',
+                        "image_path": f'/images/personal_area/{new_filename}',
                         "id_personal_area": id
                     }
                     db_image = image_schema.load(img_data)
                     db.session.add(db_image)
+            else:
+                img_data = {
+                    "image_path": f'/images/default.jpg',
+                    "id_personal_area": id
+                }
+                db_image = image_schema.load(img_data)
+                db.session.add(db_image)
 
-                db.session.commit()
-                return {'message': 'successfully!'}, 201
+            db.session.commit()
+            return {
+                       'message': 'successfully!'}, 201
 
-        return {'error': 'Personal_area is already registered'}, 200
-    return {'error': 'Empty fields'}, 400
+        return {
+                   'error': 'Personal_area is already registered'}, 200
+    return {
+               'error': 'Empty fields'}, 400
 
 
 @personal_area.route('/<id>', methods=['GET'])
@@ -85,11 +90,12 @@ def read_personal_area_by_id(token, id):
         image_schema = Images_personal_area_schema()
         photo = image_schema.dump(get_photo)
         return {
-            'currently_user': currently_user,
-            'photo': photo,
-        }, 200
+                   'currently_user': currently_user,
+                   'photo': photo,
+               }, 200
     except:
-        return {'error': 'Personal area not found'}, 401
+        return {
+                   'error': 'Personal area not found'}, 401
 
 
 @personal_area.route('/image', methods=['GET'])
@@ -98,17 +104,19 @@ def read_current_user_image(token):
     try:
         get_user = User.query.filter(User.token == token).one()
     except:
-        return {'error': 'User not found'}, 401
+        return {
+                   'error': 'User not found'}, 401
     try:
         get_personal_area = Personal_area.query.filter(Personal_area.id_user == get_user.id).one()
         get_photo = db.session.query(Images_personal_area).filter_by(id_personal_area=get_personal_area.id).first()
         image_schema = Images_personal_area_schema()
         photo = image_schema.dump(get_photo)
         return {
-            'photo': photo,
-        }, 200
+                   'photo': photo,
+               }, 200
     except:
-        return {'error': 'Personal area not found'}, 401
+        return {
+                   'error': 'Personal area not found'}, 401
 
 
 @personal_area.route('/', methods=['GET'])
@@ -117,7 +125,8 @@ def read_personal_area(token):
     try:
         get_user = User.query.filter(User.token == token).one()
     except:
-        return {'error': 'User not found'}, 401
+        return {
+                   'error': 'User not found'}, 401
     try:
         get_personal_area = Personal_area.query.filter(Personal_area.id_user == get_user.id).one()
         personal_area_schema = Personal_area_schema()
@@ -126,11 +135,12 @@ def read_personal_area(token):
         image_schema = Images_personal_area_schema()
         photo = image_schema.dump(get_photo)
         return {
-            'currently_user': currently_user,
-            'photo': photo,
-        }, 200
+                   'currently_user': currently_user,
+                   'photo': photo,
+               }, 200
     except:
-        return {'error': 'Personal area not found'}, 401
+        return {
+                   'error': 'Personal area not found'}, 401
 
 
 @personal_area.route('/', methods=['PUT'])
@@ -139,7 +149,8 @@ def update_personal_area(token):
     try:
         get_user = User.query.filter(User.token == token).one()
     except:
-        return {'error': 'Personal_area not found'}, 401
+        return {
+                   'error': 'Personal_area not found'}, 401
     personal_area = db.session.query(Personal_area).filter_by(id_user=get_user.id).first()
     if personal_area:
         if request.form:
@@ -163,7 +174,8 @@ def update_personal_area(token):
 
                 db.session.add(personal_area)
             except:
-                return {'message': 'error edit personal area'}, 401
+                return {
+                           'message': 'error edit personal area'}, 401
         try:
             image_schema = Images_personal_area_schema()
             file = request.files.get('photo')
@@ -191,10 +203,13 @@ def update_personal_area(token):
                 db_image = image_schema.load(img_data)
                 db.session.add(db_image)
         except:
-            return {'message': 'error edit photo'}, 401
+            return {
+                       'message': 'error edit photo'}, 401
         db.session.commit()
-        return {'message': 'successfully!'}, 201
-    return {'error': 'Personal_area not found'}, 401
+        return {
+                   'message': 'successfully!'}, 201
+    return {
+               'error': 'Personal_area not found'}, 401
 
 
 @personal_area.route('/', methods=['DELETE'])
@@ -205,7 +220,8 @@ def delete_personal_area(token):
     user.is_active = 0
     db.session.add(user)
     db.session.commit()
-    return {"message": 'User is deleted'}, 200
+    return {
+               "message": 'User is deleted'}, 200
 
 
 @personal_area.route('/change_password', methods=['POST'])
@@ -221,6 +237,19 @@ def change_password(token):
             user.password = hash_password
             db.session.add(user)
             db.session.commit()
-            return {'message': 'Password changed'}, 200
-        return {'error': 'Old password incorrect'}, 400
-    return {'error': 'Empty fields'}, 400
+            return {
+                       'message': 'Password changed'}, 200
+        return {
+                   'error': 'Old password incorrect'}, 400
+    return {
+               'error': 'Empty fields'}, 400
+
+
+@personal_area.route('/get_phone', methods=['GET'])
+@token_check
+def get_phone(token):
+    getted_user = User.query.filter(User.token == token).one()
+    data = db.session.query(Personal_area_schema).filter_by(id_user=getted_user.id).one()
+    return {
+               'phone': data.phone_number
+           }, 200
