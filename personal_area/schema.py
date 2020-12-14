@@ -1,7 +1,8 @@
-from marshmallow_sqlalchemy import ModelSchema
 from marshmallow import fields
-from .models import Personal_area, Images_personal_area
+from marshmallow_sqlalchemy import ModelSchema
+
 from ext import db
+from .models import Personal_area, Images_personal_area
 
 
 class Personal_area_schema(ModelSchema):
@@ -28,4 +29,3 @@ class Images_personal_area_schema(ModelSchema):
     image_path = fields.String(required=True)
     created = fields.Date(dump_only=True)
     id_personal_area = fields.Integer(required=True)
-

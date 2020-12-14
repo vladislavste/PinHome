@@ -1,6 +1,7 @@
-from ext import db
 from sqlalchemy import DateTime
 from sqlalchemy.sql import func
+
+from ext import db
 
 
 class Personal_area(db.Model):

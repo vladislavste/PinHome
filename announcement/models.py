@@ -1,6 +1,6 @@
 from sqlalchemy import DateTime
-from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 from ext import db
 
@@ -38,6 +38,7 @@ class Announcement(db.Model):
     delete = db.Column(db.Boolean, default=False, unique=False)
     no_exchange = db.Column(db.Boolean, default=False, unique=False)
     str_want = db.Column(db.String(300), nullable=True)
+    # full_user_data = relationship("User", backref="user_data")
 
 
 class Want(db.Model):
@@ -45,7 +46,6 @@ class Want(db.Model):
     announcement = db.Column(db.Integer, db.ForeignKey('announcement.id'), nullable=False)
     category = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     created = db.Column(DateTime(timezone=True), server_default=func.now())
-
 
 
 class Closed(db.Model):
@@ -57,10 +57,10 @@ class Closed(db.Model):
     type_close = relationship("TypeClose", backref="type_closed")
 
 
-
 class TypeClose(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
+
 
 class ReasonClose(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -1,20 +1,23 @@
+import itertools
 import json
 import os
+import re
 from uuid import uuid4
+
 from flask import Blueprint, jsonify
 from flask import current_app
 from flask import request
+from sqlalchemy.sql.expression import func
 from werkzeug.utils import secure_filename
-from helpers import allowed_file
-from .schema import AnnouncementSchema, AnnouncementImageSchema, CategorySchema, RecentlyViewedSchema, TypeCloseSchema, \
-    ReasonCloseSchema, ClosedSchema, AllCategorySchema, WantSchema
-from ext import db
-from .models import Announcement, ImagesAnnoun, Category, RecentlyViewed, TypeClose, ReasonClose, Want
+
 from authorization.authorization import token_check
 from authorization.models import User
-from sqlalchemy.sql.expression import func
-import re
-import itertools
+from ext import db
+from helpers import allowed_file
+from .models import Announcement, ImagesAnnoun, Category, RecentlyViewed, TypeClose, ReasonClose, Want
+from .schema import AnnouncementSchema, AnnouncementImageSchema, RecentlyViewedSchema, TypeCloseSchema, \
+    ReasonCloseSchema, ClosedSchema, AllCategorySchema, WantSchema
+
 home_api = Blueprint('api', __name__)
 
 
@@ -131,7 +134,8 @@ def all_announcements(token):
     announcement_schema = AnnouncementSchema()
     all = announcement_schema.dump(all_announ, many=True)
 
-    return {"announcement": all}, 200
+    return {
+               "announcement": all}, 200
 
 
 @home_api.route('/my_announcements/closed', methods=['GET'])
@@ -142,7 +146,8 @@ def closed_announcements(token):
     announcement_schema = AnnouncementSchema()
     all = announcement_schema.dump(all_announ, many=True)
 
-    return {"announcement": all}, 200
+    return {
+               "announcement": all}, 200
 
 
 @home_api.route('/my_announcements/saled', methods=['GET'])
@@ -153,34 +158,44 @@ def saled_announcements(token):
     announcement_schema = AnnouncementSchema()
     all = announcement_schema.dump(all_announ, many=True)
 
-    return {"announcement": all}, 200
+    return {
+               "announcement": all}, 200
 
 
 @home_api.route('/search_announcements', methods=['GET'])
-def search_announcements():
+@token_check
+def search_announcements(token):
+    getted_user = User.query.filter(User.token == token).one()
     filters = list()
 
-    filter_category = Announcement.query.filter(Announcement.category == request.args.get('category')).filter().subquery()
+    filter_category = Announcement.query.filter(Announcement.category == request.args.get('category'),
+                                                Announcement.reason_id == None, Announcement.user != getted_user.id ).filter().subquery()
     if request.args.get('category'):
         filters.append(Announcement.category == filter_category.c.category)
 
-    filter_exchange = Announcement.query.filter(Announcement.no_exchange == request.args.get('exchange')).filter().subquery()
+    filter_exchange = Announcement.query.filter(Announcement.no_exchange == request.args.get('exchange'),
+                                                Announcement.reason_id == None, Announcement.user != getted_user.id).filter().subquery()
     if request.args.get('exchange'):
         filters.append(Announcement.no_exchange == filter_exchange.c.no_exchange)
 
-    filter_city = Announcement.query.filter(Announcement.city == request.args.get('city')).filter().subquery()
+    filter_city = Announcement.query.filter(Announcement.city == request.args.get('city'),
+                                            Announcement.reason_id == None, Announcement.user != getted_user.id).filter().subquery()
     if request.args.get('city'):
         filters.append(Announcement.city == filter_city.c.city)
 
-    filter_address = Announcement.query.filter(Announcement.address == request.args.get('address')).filter().subquery()
+    filter_address = Announcement.query.filter(Announcement.address == request.args.get('address'),
+                                               Announcement.reason_id == None, Announcement.user != getted_user.id).filter().subquery()
     if request.args.get('address'):
         filters.append(Announcement.address == filter_address.c.address)
-    description = Announcement.query.filter(Announcement.description.ilike('%' + request.args.get('query') + '%'),  *filters).all()
-    name = Announcement.query.filter(Announcement.name.ilike('%' + request.args.get('query') + '%'),  *filters).all()
+    description = Announcement.query.filter(Announcement.description.ilike('%' + request.args.get('query') + '%'),
+                                            Announcement.reason_id == None, Announcement.user != getted_user.id, *filters).all()
+    name = Announcement.query.filter(Announcement.name.ilike('%' + request.args.get('query') + '%'),
+                                     Announcement.reason_id == None, Announcement.user != getted_user.id, *filters).all()
     all_announs = list(set(description + name))
     announcement_schema = AnnouncementSchema()
     all = announcement_schema.dump(all_announs, many=True)
-    return {"announcement": all}, 200
+    return {
+               "announcement": all}, 200
 
 
 @home_api.route('/all_categories', methods=['GET'])
@@ -189,7 +204,8 @@ def all_categories():
     print(query)
     category_schema = AllCategorySchema()
     all = category_schema.dump(query, many=True)
-    return {"category": all}, 200
+    return {
+               "category": all}, 200
 
 
 @home_api.route('/get_announcement/<id>', methods=['GET'])
@@ -206,6 +222,24 @@ def get_announcement(token, id):
         db.session.add(recently)
         db.session.commit()
         return jsonify(announ_dump), 200
+
+
+@home_api.route('/get_closed_users_announcement/<id>', methods=['GET'])
+def get_closed_users_announcement(id):
+    announ = Announcement.query.filter(Announcement.user == id, Announcement.reason_id != None).all()
+    announcement_schema = AnnouncementSchema()
+    announ_dump = announcement_schema.dump(announ, many=True)
+
+    return jsonify(announ_dump), 200
+
+
+@home_api.route('/get_users_announcement/<id>', methods=['GET'])
+def get_users_announcement(id):
+    announ = Announcement.query.filter(Announcement.user == id, Announcement.reason_id == None).all()
+    announcement_schema = AnnouncementSchema()
+    announ_dump = announcement_schema.dump(announ, many=True)
+
+    return jsonify(announ_dump), 200
 
 
 @home_api.route('/announcements_from_category/<id>', methods=['GET'])
@@ -284,10 +318,13 @@ def close_deal(token, id):
             announ.delete = True
         db.session.commit()
 
-        return {'result': True}
+        return {
+            'result': True}
     except:
-        return {'result': False}
-    
+        return {
+            'result': False}
+
+
 @home_api.route('/edit_want/<id>', methods=['POST'])
 @token_check
 def edit_want(token, id):
@@ -301,6 +338,7 @@ def edit_want(token, id):
         "result": True
     }), 200
 
+
 @home_api.route('/delete_want/<id>', methods=['DELETE'])
 @token_check
 def delete_want(token, id):
@@ -311,6 +349,7 @@ def delete_want(token, id):
         "result": True
     }), 200
 
+
 @home_api.route('/wants_for_user/<id>', methods=['GET'])
 @token_check
 def wants_for_user(token, id):
@@ -319,6 +358,7 @@ def wants_for_user(token, id):
     wants_schema = WantSchema()
     wants_dump = wants_schema.dump(wants, many=True)
     return jsonify(wants_dump), 200
+
 
 @home_api.route('/wants_for_current_user', methods=['GET'])
 @token_check
@@ -329,6 +369,7 @@ def wants_for_current_user(token):
     wants_schema = WantSchema()
     wants_dump = wants_schema.dump(wants, many=True)
     return jsonify(wants_dump), 200
+
 
 @home_api.route('/recommended_for_want/<id>', methods=['GET'])
 @token_check
@@ -342,7 +383,8 @@ def recommended_for_want(token, id):
     words = reg.sub('', str)
     list_of_words = words.split(' ')
     for word in list_of_words:
-        descr = Announcement.query.filter(Announcement.description.ilike('%' + word + '%'), Announcement.user != user.id).all()
+        descr = Announcement.query.filter(Announcement.description.ilike('%' + word + '%'),
+                                          Announcement.user != user.id).all()
         name = Announcement.query.filter(Announcement.name.ilike('%' + word + '%'), Announcement.user != user.id).all()
         all_announs = list(set(descr + name))
         for_result.append(all_announs)
