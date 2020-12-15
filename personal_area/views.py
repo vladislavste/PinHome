@@ -247,7 +247,13 @@ def change_password(token):
 
 @personal_area.route('/get_phone/<id>', methods=['GET'])
 def get_phone(id):
-    data = db.session.query(Personal_area).filter_by(id_user=id).one()
-    return {
-               'phone': data.phone_number
-           }, 200
+    user = db.session.query(User).filter_by(id=id).one()
+    if user.have_personal_area:
+        data = db.session.query(Personal_area).filter_by(id_user=id).one()
+        return {
+                   'phone': data.phone_number
+               }, 200
+    else:
+        return {
+                   'phone': None
+               }, 200
