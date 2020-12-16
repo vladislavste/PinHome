@@ -76,8 +76,10 @@ def update_annotation(token, id):
     announ_schema = AnnouncementSchema()
     announcement = announ_schema.load(data=request_data)
     db.session.add(announcement)
+    db.session.flush()
+    id = announcement.id
     db.session.commit()
-
+    
     for file in files:
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
