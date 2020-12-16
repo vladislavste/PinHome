@@ -231,8 +231,8 @@ def get_closed_users_announcement(id):
     announ = Announcement.query.filter(Announcement.user == id, Announcement.reason_id != None).all()
     announcement_schema = AnnouncementSchema()
     announ_dump = announcement_schema.dump(announ, many=True)
+    return { "announcement": all}, 200
 
-    return jsonify(announ_dump), 200
 
 
 @home_api.route('/get_users_announcement/<id>', methods=['GET'])
@@ -241,7 +241,7 @@ def get_users_announcement(id):
     announcement_schema = AnnouncementSchema()
     announ_dump = announcement_schema.dump(announ, many=True)
 
-    return jsonify(announ_dump), 200
+    return { "announcement": announ_dump}, 200
 
 
 @home_api.route('/announcements_from_category/<id>', methods=['GET'])
