@@ -118,7 +118,7 @@ class AnnouncementSchema(ModelSchema):
     created_date = fields.Date(dump_only=True)
     user = fields.Integer(required=True)
     images = fields.Nested(AnnouncementImageSchema, many=True)
-    want = fields.Nested(WantSchema, many=True)
+    want = fields.Nested(WantSchema, many=True, required=False)
     city = fields.String(required=False)
     address = fields.String(required=False)
     reason = fields.Nested(ClosedNestedSchema, dump_only=True)
